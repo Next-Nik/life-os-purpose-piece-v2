@@ -323,8 +323,8 @@ const App = {
       <div class="deep-gate-card">
         <div class="deep-gate-eyebrow">Go Deeper</div>
         <h2 class="deep-gate-heading">The tension. The shadow. The full picture.</h2>
-        <p class="deep-gate-body">The First Look gave you the shape. The deep experience is a real conversation — into what this pattern costs you, where it breaks, and what it's been asking of you. You leave knowing not just what you are, but what that fully asks.</p>
-        <button class="deep-gate-cta" onclick="App.unlockDeep()">Unlock the deep experience</button>
+        <p class="deep-gate-body">The First Look gave you the shape. The Deep Dive is a real conversation — into what this pattern costs you, where it breaks, and what it's been asking of you. You leave knowing not just what you are, but what that fully asks.</p>
+        <button class="deep-gate-cta" onclick="App.unlockDeep()">Unlock the Deep Dive</button>
         <button class="deep-gate-dismiss" onclick="document.getElementById('deep-gate-overlay').remove()">Not now</button>
       </div>
     `;
