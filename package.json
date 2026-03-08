@@ -1,0 +1,9 @@
+{
+  "name": "purpose-piece",
+  "version": "1.0.0",
+  "description": "Purpose Piece experience",
+  "private": true,
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.25.0"
+  }
+}
