@@ -1,4 +1,4 @@
-// PURPOSE PIECE — DEEP EXPERIENCE APP LOGIC
+// PURPOSE PIECE — DEEP DIVE APP LOGIC
 // app-deep.js
 // Depends on ui.js (loaded first via deep.html).
 // Reads First Look session from sessionStorage, starts deep conversation.
@@ -64,7 +64,7 @@ const DeepApp = {
     const chatContainer = document.getElementById('chat-container');
     const msg = document.createElement('div');
     msg.className = 'message message-assistant';
-    msg.textContent = 'The deep experience begins after the First Look. Complete the Purpose Piece assessment first, then return here.';
+    msg.textContent = 'The Deep Dive begins after the First Look. Complete the Purpose Piece assessment first, then return here.';
     chatContainer.appendChild(msg);
 
     const link = document.createElement('a');
@@ -265,7 +265,7 @@ const DeepApp = {
     const map = {
       shadow:    { pct: 40, label: 'Deep Conversation' },
       mirror:    { pct: 80, label: 'The Full Picture'  },
-      complete:  { pct: 100, label: 'Deep Experience'  }
+      complete:  { pct: 100, label: 'Deep Dive'  }
     };
     const current = map[phase] || { pct: 20, label: 'Deep Conversation' };
     if (fill)    fill.style.width = current.pct + '%';
