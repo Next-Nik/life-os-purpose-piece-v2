@@ -1,23 +1,25 @@
 /* LIFE OS: PURPOSE PIECE — STYLESHEET */
-/* Design system: document aesthetic — white ground, dark text, gold accents */
+/* Design system aligned to Pulse — warm gold #C8922A, Cormorant/Georgia, #FAFAF7 bg */
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap');
 
 /* ─── CSS Variables ─────────────────────────────────────────────────────────── */
 :root {
-  --gold:         #C8A96E;
-  --gold-light:   #E8D5B0;
-  --gold-mid:     #E8C87A;
-  --gold-muted:   rgba(200,169,110,0.5);
-  --gold-rule:    rgba(200,169,110,0.35);
-  --doc-dark:     #1A1A1A;
-  --doc-mid:      #4A4A4A;
-  --doc-light:    #6B6B6B;
-  --page-bg:      #FAFAF7;
-  --card-bg:      #FFFFFF;
-  --card-border:  rgba(200,169,110,0.2);
-  --active-bg:    rgba(200,169,110,0.1);
-  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --gold:           #C8922A;
+  --gold-light:     #E8C890;
+  --gold-mid:       #B8821A;
+  --gold-muted:     rgba(200,146,42,0.55);
+  --gold-rule:      rgba(200,146,42,0.35);
+  --gold-border:    rgba(200,146,42,0.25);
+  --gold-border-hi: rgba(200,146,42,0.55);
+  --doc-dark:       #0F1523;
+  --doc-mid:        #4A4A4A;
+  --doc-light:      #6B6B6B;
+  --page-bg:        #FAFAF7;
+  --card-bg:        #FFFFFF;
+  --card-border:    rgba(200,146,42,0.25);
+  --active-bg:      rgba(200,146,42,0.10);
+  --font-serif:     'Cormorant Garamond', Georgia, serif;
 }
 
 /* ─── Reset & base ─────────────────────────────────────────────────────────── */
@@ -38,11 +40,15 @@ body {
   overflow-x: hidden;
 }
 
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(200,146,42,0.35); border-radius: 2px; }
+
 /* ─── Layout ────────────────────────────────────────────────────────────────── */
 .container {
-  max-width: 760px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 44px 24px 120px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -51,33 +57,45 @@ body {
 /* ─── Header ────────────────────────────────────────────────────────────────── */
 .header {
   text-align: center;
-  padding: 48px 0 28px;
+  padding-bottom: 32px;
   position: relative;
+  border-bottom: 1px solid rgba(200,146,42,0.25);
+  margin-bottom: 36px;
 }
 
 .logo {
-  width: 64px;
-  height: auto;
-  margin-bottom: 20px;
-  opacity: 0.9;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  margin-bottom: 16px;
+  opacity: 1;
 }
 
 .header h1 {
   font-family: var(--font-serif);
-  font-size: 0.8rem;
-  font-weight: 400;
+  font-size: 52px;
+  font-weight: 300;
   color: var(--gold);
-  margin-bottom: 6px;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin: 0;
+}
+
+/* "Life OS: " prefix rendered as smaller inline prefix */
+.header-prefix {
+  font-size: 22px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--gold);
 }
 
 .header p {
   font-family: var(--font-serif);
-  font-size: 1rem;
+  font-size: 13px;
   color: var(--doc-light);
   font-style: italic;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
+  margin-top: 8px;
 }
 
 /* ─── Progress bar ──────────────────────────────────────────────────────────── */
@@ -86,8 +104,9 @@ body {
 }
 
 .progress-bar {
-  height: 1px;
-  background: rgba(200,169,110,0.2);
+  height: 2px;
+  background: rgba(200,146,42,0.15);
+  border-radius: 1px;
   overflow: hidden;
 }
 
@@ -95,18 +114,18 @@ body {
   height: 100%;
   background: var(--gold);
   transition: width 0.5s ease;
+  border-radius: 1px;
   width: 0%;
 }
 
 .progress-label {
   font-family: var(--font-serif);
-  font-size: 0.62rem;
+  font-size: 10px;
   color: var(--gold);
-  margin-top: 7px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  margin-top: 7px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  opacity: 0.8;
 }
 
 /* ─── Chat area ─────────────────────────────────────────────────────────────── */
@@ -114,55 +133,55 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding-bottom: 130px;
 }
 
 /* ─── Messages ──────────────────────────────────────────────────────────────── */
 .message {
-  max-width: 85%;
+  max-width: 86%;
   line-height: 1.85;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   white-space: pre-wrap;
   word-wrap: break-word;
-  animation: fadeIn 0.35s ease-in;
+  animation: fadeUp 0.35s ease-out;
 }
 
 .message-assistant,
 .message-synthesis {
-  max-width: 88%;
-  padding: 22px 28px;
-  border-radius: 2px;
+  max-width: 92%;
+  padding: 20px 24px;
+  border-radius: 10px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-left: 3px solid var(--gold-rule);
+  border-left: 3px solid var(--gold-border-hi);
   align-self: flex-start;
   color: var(--doc-dark);
   font-family: var(--font-serif);
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   font-weight: 400;
   line-height: 1.9;
   white-space: pre-wrap;
   word-wrap: break-word;
-  animation: fadeIn 0.4s ease-in;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  animation: fadeUp 0.4s ease-out;
+  box-shadow: 0 2px 8px rgba(200,146,42,0.08);
 }
 
 .message-user {
-  background: var(--gold);
-  color: #FFFFFF;
+  background: rgba(200,146,42,0.08);
+  border: 1px solid var(--card-border);
+  color: var(--doc-mid);
   align-self: flex-end;
-  border-radius: 2px;
-  padding: 14px 20px;
+  border-radius: 10px;
+  padding: 14px 18px;
   font-family: var(--font-serif);
-  font-weight: 500;
-  font-size: 1.05rem;
+  font-size: 1rem;
+  font-style: italic;
   line-height: 1.7;
-  box-shadow: 0 1px 4px rgba(200,169,110,0.25);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
@@ -172,7 +191,6 @@ body {
   align-items: center;
   gap: 14px;
   margin: 8px 0;
-  opacity: 0.5;
 }
 
 .phase-divider::before,
@@ -180,14 +198,14 @@ body {
   content: '';
   flex: 1;
   height: 1px;
-  background: var(--gold-rule);
+  background: rgba(200,146,42,0.2);
 }
 
 .phase-divider span {
   font-family: var(--font-serif);
-  font-size: 0.62rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
   white-space: nowrap;
@@ -195,37 +213,36 @@ body {
 
 /* ─── Synthesis mirror ───────────────────────────────────────────────────────── */
 .message-synthesis-mirror {
-  max-width: 88%;
-  padding: 28px 32px;
-  border-radius: 2px;
+  max-width: 92%;
+  padding: 24px 28px;
+  border-radius: 10px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-left: 3px solid var(--gold);
+  border-left: 3px solid var(--gold-border-hi);
   align-self: flex-start;
   color: var(--doc-dark);
   font-family: var(--font-serif);
-  font-size: 1.1rem;
+  font-size: 1.06rem;
   font-weight: 400;
   line-height: 1.95;
   white-space: pre-wrap;
   word-wrap: break-word;
-  animation: fadeIn 0.4s ease-in;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  animation: fadeUp 0.4s ease-out;
+  box-shadow: 0 2px 8px rgba(200,146,42,0.08);
 }
 
 /* ─── Synthesis heading & sections ──────────────────────────────────────────── */
 .synthesis-heading {
   font-family: var(--font-serif);
-  font-size: 0.72rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold);
   text-align: center;
-  text-decoration: underline;
-  text-decoration-color: var(--gold);
-  text-underline-offset: 7px;
   margin-bottom: 22px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(200,146,42,0.15);
 }
 
 .synthesis-intro {
@@ -235,7 +252,8 @@ body {
   font-style: italic;
   margin-bottom: 24px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--card-border);
+  border-bottom: 1px solid rgba(200,146,42,0.08);
+  line-height: 1.85;
 }
 
 .synthesis-section {
@@ -248,21 +266,21 @@ body {
 
 .synthesis-section-label {
   font-family: var(--font-serif);
-  font-size: 0.62rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 9px;
-  display: inline-block;
-  border-bottom: 1px solid var(--gold);
-  padding-bottom: 3px;
+  margin-bottom: 10px;
+  display: block;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(200,146,42,0.12);
 }
 
 .synthesis-section p {
   color: var(--doc-dark);
   font-family: var(--font-serif);
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   line-height: 1.9;
   margin: 0;
 }
@@ -275,47 +293,49 @@ body {
   margin-top: 4px;
   align-self: flex-start;
   width: 100%;
-  max-width: 88%;
+  max-width: 92%;
 }
 
 .option-btn {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 2px;
+  border-radius: 10px;
   padding: 13px 18px;
   text-align: left;
   cursor: pointer;
   font-family: var(--font-serif);
   font-size: 1rem;
   color: var(--doc-dark);
-  line-height: 1.55;
+  line-height: 1.6;
   transition: all 0.15s ease;
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
 }
 
 .option-btn:hover {
-  border-color: var(--gold);
+  border-color: var(--gold-border-hi);
   background: var(--active-bg);
 }
 
 .option-btn.selected {
-  background: var(--gold);
-  color: #FFFFFF;
-  border-color: var(--gold);
+  background: rgba(200,146,42,0.08);
+  border-color: var(--gold-border-hi);
+  color: var(--doc-dark);
 }
 
 .option-letter {
-  font-weight: 500;
+  font-family: var(--font-serif);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: var(--gold-muted);
   min-width: 18px;
-  opacity: 0.45;
-  font-style: italic;
+  padding-top: 4px;
 }
 
 .option-btn.selected .option-letter {
-  opacity: 1;
+  color: var(--gold);
 }
 
 /* ─── Typing indicator ──────────────────────────────────────────────────────── */
@@ -324,11 +344,12 @@ body {
   align-self: flex-start;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 2px;
+  border-left: 3px solid rgba(200,146,42,0.35);
+  border-radius: 10px;
   padding: 14px 18px;
   gap: 6px;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
 }
 
 .typing-indicator.active {
@@ -336,19 +357,19 @@ body {
 }
 
 .typing-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--gold-muted);
+  width: 5px;
+  height: 5px;
+  background: rgba(200,146,42,0.5);
   border-radius: 50%;
-  animation: typingBounce 1.2s infinite;
+  animation: typingBounce 1.3s infinite;
 }
 
 .typing-dot:nth-child(2) { animation-delay: 0.2s; }
 .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
 @keyframes typingBounce {
-  0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
-  30%            { transform: translateY(-5px); opacity: 1; }
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+  30%            { transform: translateY(-4px); opacity: 0.8; }
 }
 
 /* ─── Input area (fixed at bottom) ──────────────────────────────────────────── */
@@ -357,15 +378,15 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(250,250,247,0.97);
-  backdrop-filter: blur(10px);
-  border-top: 1px solid var(--card-border);
+  background: rgba(250,250,247,0.96);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(200,146,42,0.25);
   padding: 16px 20px;
   z-index: 100;
 }
 
 .input-inner {
-  max-width: 760px;
+  max-width: 680px;
   margin: 0 auto;
   display: flex;
   gap: 10px;
@@ -376,26 +397,27 @@ body {
   flex: 1;
   padding: 12px 16px;
   border: 1px solid var(--card-border);
-  border-radius: 2px;
+  border-radius: 8px;
   font-family: var(--font-serif);
-  font-size: 1.05rem;
+  font-size: 1rem;
+  font-style: italic;
   color: var(--doc-dark);
   background: var(--card-bg);
   resize: none;
   min-height: 48px;
   max-height: 120px;
-  line-height: 1.55;
-  transition: border-color 0.15s ease;
+  line-height: 1.6;
+  transition: border-color 0.2s ease;
   outline: none;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 #user-input:focus {
-  border-color: var(--gold);
+  border-color: var(--gold-border-hi);
 }
 
 #user-input::placeholder {
-  color: var(--doc-light);
+  color: #BBAB90;
   font-style: italic;
 }
 
@@ -407,22 +429,23 @@ body {
   background: var(--gold);
   color: #FFFFFF;
   border: none;
-  border-radius: 2px;
-  padding: 12px 24px;
+  border-radius: 8px;
+  padding: 12px 22px;
   font-family: var(--font-serif);
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
   min-height: 48px;
   white-space: nowrap;
-  letter-spacing: 0.06em;
 }
 
-.btn-send:hover  { background: #b8923e; }
-.btn-send:active { background: #a07830; }
+.btn-send:hover  { background: var(--gold-mid); }
+.btn-send:active { opacity: 0.85; }
 .btn-send:disabled {
-  background: rgba(200,169,110,0.3);
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
@@ -430,41 +453,42 @@ body {
 #welcome-screen {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-radius: 2px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  box-shadow: 0 2px 8px rgba(200,146,42,0.08);
 }
 
 .carousel-track {
   display: flex;
   width: 300%;
-  transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+  transition: transform 0.55s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 .carousel-slide {
   width: 33.333%;
-  padding: 48px 48px 36px;
+  padding: 48px 44px 36px;
   box-sizing: border-box;
   flex-shrink: 0;
 }
 
 .carousel-heading {
   font-family: var(--font-serif);
-  font-size: 1.65rem;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 400;
   color: var(--doc-dark);
-  line-height: 1.25;
-  margin-bottom: 26px;
+  line-height: 1.3;
+  margin-bottom: 22px;
   letter-spacing: 0.01em;
 }
 
 .carousel-slide p {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   color: var(--doc-mid);
   font-family: var(--font-serif);
-  font-size: 1.1rem;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 1.9;
+  font-style: italic;
+  line-height: 1.85;
 }
 
 .carousel-slide p:last-of-type {
@@ -476,8 +500,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 48px 32px;
-  border-top: 1px solid var(--card-border);
+  padding: 20px 44px 32px;
+  border-top: 1px solid rgba(200,146,42,0.15);
 }
 
 .carousel-dots {
@@ -490,14 +514,14 @@ body {
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: rgba(200,169,110,0.3);
-  transition: background 0.3s ease, transform 0.3s ease;
+  background: rgba(200,146,42,0.25);
+  transition: all 0.3s ease;
   display: inline-block;
 }
 
 .carousel-dot.active {
   background: var(--gold);
-  transform: scale(1.5);
+  transform: scale(1.4);
 }
 
 .carousel-arrow {
@@ -508,28 +532,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.15s ease, opacity 0.15s ease;
-  opacity: 0.6;
+  transition: opacity 0.15s ease;
+  opacity: 0.5;
 }
 
-.carousel-arrow:hover  { transform: scale(1.12); opacity: 1; }
-.carousel-arrow:active { transform: scale(0.95); }
+.carousel-arrow:hover  { opacity: 0.9; }
+.carousel-arrow:active { transform: scale(0.92); }
 
 .carousel-begin {
-  background: none;
+  background: var(--gold);
   border: none;
   cursor: pointer;
   font-family: var(--font-serif);
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--gold);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  padding: 4px 0;
+  font-size: 19px;
+  font-weight: 500;
+  color: #FFFFFF;
+  letter-spacing: 0.06em;
+  padding: 12px 28px;
+  border-radius: 8px;
   transition: opacity 0.15s ease;
 }
 
-.carousel-begin:hover { opacity: 0.6; }
+.carousel-begin:hover { opacity: 0.85; }
 
 /* ─── Profile delivery ──────────────────────────────────────────────────────── */
 .message-profile {
@@ -543,34 +567,32 @@ body {
 
 .profile-card {
   background: var(--card-bg);
-  border-radius: 2px;
+  border-radius: 12px;
   overflow: hidden;
   color: var(--doc-dark);
   font-family: var(--font-serif);
   font-size: 1.05rem;
   line-height: 1.8;
   border: 1px solid var(--card-border);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border-left: 3px solid var(--gold-border-hi);
+  box-shadow: 0 2px 16px rgba(200,146,42,0.08);
 }
 
 .profile-hero {
-  padding: 36px 40px 28px;
-  border-bottom: 1px solid var(--card-border);
-  background: var(--page-bg);
+  padding: 32px 36px 24px;
+  border-bottom: 1px solid rgba(200,146,42,0.15);
+  background: rgba(200,146,42,0.03);
 }
 
 .profile-card-heading {
   font-family: var(--font-serif);
-  font-size: 0.65rem;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold);
-  text-align: center;
-  text-decoration: underline;
-  text-decoration-color: var(--gold);
-  text-underline-offset: 6px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
+  display: block;
 }
 
 .profile-archetype-name {
@@ -599,31 +621,31 @@ body {
   display: inline-block;
   width: 1px;
   height: 12px;
-  background: var(--gold-muted);
+  background: rgba(200,146,42,0.3);
   vertical-align: middle;
 }
 
 .profile-section {
-  padding: 22px 40px;
-  border-bottom: 1px solid rgba(200,169,110,0.1);
+  padding: 20px 36px;
+  border-bottom: 1px solid rgba(200,146,42,0.08);
 }
 
 .profile-section:last-child {
   border-bottom: none;
-  padding-bottom: 28px;
+  padding-bottom: 24px;
 }
 
 .profile-section-label {
   font-family: var(--font-serif);
-  font-size: 0.62rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 10px;
-  display: inline-block;
-  border-bottom: 1px solid var(--gold);
-  padding-bottom: 3px;
+  display: block;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(200,146,42,0.12);
 }
 
 .profile-section p {
@@ -667,7 +689,7 @@ body {
 
 .profile-action-tier {
   font-family: var(--font-serif);
-  font-size: 0.6rem;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -686,7 +708,7 @@ body {
 
 .profile-resource {
   display: block;
-  border-left: 2px solid rgba(200,169,110,0.35);
+  border-left: 2px solid rgba(200,146,42,0.35);
   padding-left: 16px;
 }
 
@@ -716,65 +738,48 @@ body {
 }
 
 .profile-closing {
-  padding: 24px 40px 32px;
+  padding: 20px 36px 28px;
   text-align: center;
   color: var(--doc-light);
   font-family: var(--font-serif);
-  font-size: 0.92rem;
+  font-size: 11px;
   font-style: italic;
   letter-spacing: 0.05em;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid rgba(200,146,42,0.08);
 }
 
-/* ─── Ritual threshold ───────────────────────────────────────────────────────── */
+/* ─── Ritual threshold (First Look → Go Deeper) ────────────────────────────── */
 .section-break {
   margin: 2rem 0;
   border: none;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid rgba(200,146,42,0.15);
 }
 
 .question-header {
   font-family: var(--font-serif);
+  font-size: 9px;
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: var(--gold);
   text-transform: uppercase;
-  letter-spacing: 0.14em;
-  font-size: 0.62rem;
+  letter-spacing: 0.2em;
 }
 
-/* ─── Responsive ────────────────────────────────────────────────────────────── */
-@media (max-width: 600px) {
-  .header { padding: 28px 0 18px; }
-  .header h1 { font-size: 0.7rem; }
-  .message { max-width: 92%; font-size: 1rem; }
-  .option-buttons { max-width: 100%; }
-  .carousel-slide { padding: 28px 24px; }
-  .carousel-nav { padding: 18px 24px 28px; }
-  .profile-hero { padding: 26px 24px 22px; }
-  .profile-archetype-name { font-size: 2.4rem; }
-  .profile-section { padding: 18px 24px; }
-  .profile-closing { padding: 20px 24px 28px; }
-  .message-synthesis-mirror { padding: 22px 24px; }
-}
-
-/* ─── Profile threshold (First Look → Go Deeper) ────────────────────────────── */
 .profile-threshold {
-  padding: 32px 40px 36px;
-  border-top: 1px solid var(--card-border);
-  background: var(--page-bg);
+  padding: 28px 36px 32px;
+  border-top: 1px solid rgba(200,146,42,0.15);
+  background: rgba(200,146,42,0.03);
   text-align: center;
 }
 
 .profile-threshold-eyebrow {
   font-family: var(--font-serif);
-  font-size: 0.6rem;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 14px;
-  opacity: 0.7;
 }
 
 .profile-threshold-body {
@@ -788,24 +793,20 @@ body {
 }
 
 .btn-go-deeper {
-  background: none;
-  border: 1px solid var(--gold);
-  border-radius: 2px;
-  color: var(--gold);
+  background: var(--gold);
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
   font-family: var(--font-serif);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 12px 32px;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  padding: 14px 32px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
-.btn-go-deeper:hover {
-  background: var(--gold);
-  color: #FFFFFF;
-}
+.btn-go-deeper:hover { opacity: 0.85; }
 
 /* ─── Deep gate overlay ──────────────────────────────────────────────────────── */
 .deep-gate-overlay {
@@ -818,24 +819,24 @@ body {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  animation: fadeIn 0.3s ease;
+  animation: fadeUp 0.3s ease;
 }
 
 .deep-gate-card {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-top: 3px solid var(--gold);
-  border-radius: 2px;
+  border-radius: 12px;
   padding: 48px 52px;
   max-width: 560px;
   width: 100%;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 40px rgba(200,146,42,0.12);
   text-align: center;
 }
 
 .deep-gate-eyebrow {
   font-family: var(--font-serif);
-  font-size: 0.6rem;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -867,25 +868,24 @@ body {
   background: var(--gold);
   color: #FFFFFF;
   border: none;
-  border-radius: 2px;
-  padding: 15px 32px;
+  border-radius: 8px;
+  padding: 18px 32px;
   font-family: var(--font-serif);
-  font-size: 0.85rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: opacity 0.15s ease;
   margin-bottom: 14px;
 }
 
-.deep-gate-cta:hover { background: #b8923e; }
+.deep-gate-cta:hover { opacity: 0.85; }
 
 .deep-gate-dismiss {
   background: none;
   border: none;
   font-family: var(--font-serif);
-  font-size: 0.88rem;
+  font-size: 13px;
   font-style: italic;
   color: var(--doc-light);
   cursor: pointer;
@@ -895,40 +895,40 @@ body {
 
 .deep-gate-dismiss:hover { opacity: 0.5; }
 
-/* ─── Deep experience — conversation styles ──────────────────────────────────── */
+/* ─── Deep Dive — conversation styles ──────────────────────────────────── */
 .deep-opening {
-  max-width: 88%;
-  padding: 28px 32px;
-  border-radius: 2px;
+  max-width: 92%;
+  padding: 22px 26px;
+  border-radius: 10px;
   background: var(--card-bg);
   border: 1px solid var(--card-border);
-  border-left: 3px solid var(--gold);
+  border-left: 3px solid var(--gold-border-hi);
   align-self: flex-start;
   color: var(--doc-dark);
   font-family: var(--font-serif);
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   font-weight: 400;
   line-height: 1.95;
-  animation: fadeIn 0.4s ease-in;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  animation: fadeUp 0.4s ease-out;
+  box-shadow: 0 2px 8px rgba(200,146,42,0.08);
 }
 
 .deep-layer-label {
   font-family: var(--font-serif);
-  font-size: 0.6rem;
+  font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: 0.6;
+  opacity: 0.7;
   margin: 24px 0 8px;
   align-self: flex-start;
 }
 
-/* Deep output card — same structure as profile-card, distinct header colour */
+/* ─── Deep output card ───────────────────────────────────────────────────────── */
 .deep-output-card {
   background: var(--card-bg);
-  border-radius: 2px;
+  border-radius: 12px;
   overflow: hidden;
   color: var(--doc-dark);
   font-family: var(--font-serif);
@@ -936,29 +936,27 @@ body {
   line-height: 1.8;
   border: 1px solid var(--card-border);
   border-top: 3px solid var(--gold);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.09);
+  box-shadow: 0 4px 20px rgba(200,146,42,0.1);
   max-width: 100%;
   align-self: stretch;
 }
 
 .deep-output-hero {
-  padding: 36px 40px 28px;
-  border-bottom: 1px solid var(--card-border);
-  background: var(--page-bg);
+  padding: 32px 36px 24px;
+  border-bottom: 1px solid rgba(200,146,42,0.15);
+  background: rgba(200,146,42,0.03);
   text-align: center;
 }
 
 .deep-output-heading {
   font-family: var(--font-serif);
-  font-size: 0.62rem;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold);
-  text-decoration: underline;
-  text-decoration-color: var(--gold);
-  text-underline-offset: 6px;
-  margin-bottom: 22px;
+  margin-bottom: 18px;
+  display: block;
 }
 
 .deep-output-archetype {
@@ -983,19 +981,34 @@ body {
 }
 
 .deep-output-closing {
-  padding: 24px 40px 32px;
+  padding: 20px 36px 28px;
   text-align: center;
   color: var(--doc-light);
   font-family: var(--font-serif);
-  font-size: 0.92rem;
+  font-size: 11px;
   font-style: italic;
   letter-spacing: 0.05em;
-  border-top: 1px solid var(--card-border);
+  border-top: 1px solid rgba(200,146,42,0.08);
 }
 
+/* ─── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
-  .profile-threshold { padding: 24px 24px 28px; }
+  .container { padding: 32px 18px 100px; }
+  .header h1 { font-size: 40px; }
+  .header-prefix { font-size: 18px; }
+  .logo { width: 56px; height: 56px; }
+  .message { max-width: 96%; font-size: 0.97rem; }
+  .message-assistant, .message-synthesis { max-width: 98%; }
+  .option-buttons { max-width: 100%; }
+  .carousel-slide { padding: 28px 24px 22px; }
+  .carousel-nav { padding: 18px 24px 28px; }
+  .profile-hero { padding: 22px 20px 18px; }
+  .profile-archetype-name { font-size: 2.4rem; }
+  .profile-section { padding: 16px 20px; }
+  .profile-closing { padding: 16px 20px 24px; }
+  .profile-threshold { padding: 20px 20px 24px; }
+  .message-synthesis-mirror { padding: 20px 22px; }
   .deep-gate-card { padding: 36px 28px; }
-  .deep-output-hero { padding: 26px 24px 22px; }
+  .deep-output-hero { padding: 22px 20px 18px; }
   .deep-output-archetype { font-size: 2.4rem; }
 }
