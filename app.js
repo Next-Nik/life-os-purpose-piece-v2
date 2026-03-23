@@ -5,8 +5,8 @@
 const App = {
   session: null,
   currentPhase: null,
-  currentOptions: null,  // current button options if in button mode
-  isWaiting: false,      // prevent double-sends
+  currentOptions: null,
+  isWaiting: false,
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   init() {
@@ -16,7 +16,6 @@ const App = {
   bindEvents() {
     const sendBtn = document.getElementById("send-btn");
     const input   = document.getElementById("user-input");
-    // Carousel — arrow advances slides, dots show position, last slide swaps arrow for Begin
     let currentSlide = 0;
     const totalSlides = 3;
     const track  = document.getElementById("carousel-track");
@@ -26,33 +25,22 @@ const App = {
     const advanceCarousel = () => {
       currentSlide++;
       track.style.transform = `translateX(-${currentSlide * 33.333}%)`;
-
-      // Update dots
       dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
 
-      // On last slide: swap arrow for Begin text button
       if (currentSlide === totalSlides - 1) {
         arrow.outerHTML = `<button class="carousel-begin" id="carousel-arrow">Find where you fit</button>`;
         document.getElementById("carousel-arrow").addEventListener("click", () => this.startConversation());
       }
     };
 
-    if (arrow) {
-      arrow.addEventListener("click", advanceCarousel);
-    }
-
-    if (sendBtn) {
-      sendBtn.addEventListener("click", () => this.sendUserInput());
-    }
+    if (arrow) arrow.addEventListener("click", advanceCarousel);
+    if (sendBtn) sendBtn.addEventListener("click", () => this.sendUserInput());
 
     if (input) {
-      // Auto-grow textarea
       input.addEventListener("input", () => {
         input.style.height = "auto";
         input.style.height = Math.min(input.scrollHeight, 120) + "px";
       });
-
-      // Enter to send (shift+enter for newline)
       input.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
           e.preventDefault();
@@ -75,7 +63,6 @@ const App = {
 
     try {
       const data = await this.callAPI([]);
-
       UI.hideTyping();
       this.handleAPIResponse(data, true);
     } catch (err) {
@@ -87,16 +74,12 @@ const App = {
   // ─── Send user input ────────────────────────────────────────────────────────
   sendUserInput() {
     if (this.isWaiting) return;
-
     const input = document.getElementById("user-input");
     const text  = input ? input.value.trim() : "";
     if (!text) return;
-
     this.sendMessage(text);
   },
 
-  // Called by option button clicks and by direct text input
-  // suppressBubble: true when caller has already rendered the user message (e.g. button handler)
   sendMessage(text, suppressBubble = false) {
     if (this.isWaiting) return;
     this.isWaiting = true;
@@ -106,19 +89,16 @@ const App = {
 
     const chatContainer = document.getElementById("chat-container");
 
-    // Show user bubble (skip if caller already rendered it)
     if (!suppressBubble) {
       const userBubble = UI.createUserMessage(text);
       chatContainer.appendChild(userBubble);
       UI.scrollToMessage(userBubble);
     }
 
-    // Show typing
     const typingEl = UI.createTypingIndicator();
     chatContainer.appendChild(typingEl);
     UI.showTyping();
 
-    // Build messages array (simple — just the latest user message)
     const messages = [{ role: "user", content: text }];
 
     this.callAPI(messages)
@@ -138,17 +118,12 @@ const App = {
   // ─── API call ───────────────────────────────────────────────────────────────
   async callAPI(messages) {
     const body = { messages, session: this.session };
-
     const response = await fetch("/api/chat", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(body)
     });
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
     return response.json();
   },
 
@@ -158,7 +133,7 @@ const App = {
 
     const chatContainer = document.getElementById("chat-container");
 
-    // Phase transition divider (when phase changes)
+    // Phase transition divider
     if (data.phase && data.phase !== this.currentPhase) {
       if (this.currentPhase !== null && data.phaseLabel) {
         const divider = UI.createPhaseDivider(data.phaseLabel);
@@ -174,7 +149,7 @@ const App = {
 
     // Assistant message
     if (data.message) {
-      // Ritual threshold: section break + question header before Phase 1 questions
+      // Question label — rendered as a visual header above the question body
       if (data.questionLabel) {
         const hr = document.createElement("hr");
         hr.className = "section-break";
@@ -223,18 +198,25 @@ const App = {
       }
     }
 
-    // Option buttons (if inputMode is "buttons" and options provided)
+    // nextMessage: post-probe-3 case — acknowledgment rendered first, question follows
+    if (data.nextMessage) {
+      setTimeout(() => {
+        const msgEl = UI.createAssistantMessage(data.nextMessage);
+        chatContainer.appendChild(msgEl);
+        setTimeout(() => msgEl.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      }, 600);
+    }
+
+    // Option buttons
     if (data.inputMode === "buttons" && data.options && data.options.length > 0) {
       this.currentOptions = data.options;
       const buttonsEl = UI.createOptionButtons(data.options, (id, text) => {
-        // Show full option text in the chat bubble for context.
-        // Send only the letter to the engine — prevents false multi-letter detection.
         const displayText = `${id.toUpperCase()}) ${text}`;
         const chatContainer = document.getElementById("chat-container");
         const userBubble = UI.createUserMessage(displayText);
         chatContainer.appendChild(userBubble);
         UI.scrollToMessage(userBubble);
-        this.sendMessage(id.toUpperCase(), true); // suppressBubble — display bubble already rendered above
+        this.sendMessage(id.toUpperCase(), true);
       });
       chatContainer.appendChild(buttonsEl);
       UI.scrollToMessage(buttonsEl);
@@ -247,13 +229,28 @@ const App = {
       UI.setInputMode(data.inputMode || "text");
     }
 
-    // Auto-advance handling — two phases use this
+    // Auto-advance — three phases use this
     if (data.autoAdvance) {
       const delay = data.advanceDelay || 500;
       UI.setInputMode("none");
 
-      if (data.phase === "thinking") {
-        // Thinking → synthesis: show animated dots, fire API, dots disappear when synthesis arrives
+      if (data.phase === "welcome") {
+        // Welcome → Q1: brief pause then fire Q1
+        setTimeout(() => {
+          const typingEl = UI.createTypingIndicator();
+          chatContainer.appendChild(typingEl);
+          UI.scrollToMessage(typingEl);
+          App.callAPI([]).then(q1data => {
+            typingEl.remove();
+            App.handleAPIResponse(q1data);
+          }).catch(e => {
+            typingEl.remove();
+            console.error("Welcome auto-advance error:", e);
+          });
+        }, delay);
+
+      } else if (data.phase === "thinking") {
+        // Thinking → synthesis
         setTimeout(() => {
           const typingEl = UI.createTypingIndicator();
           chatContainer.appendChild(typingEl);
@@ -268,7 +265,7 @@ const App = {
         }, delay);
 
       } else if (data.phase === "synthesis") {
-        // Synthesis → profile: pause, show bridge message + dots, fire API, both disappear when profile arrives
+        // Synthesis → profile
         setTimeout(() => {
           const bridgeEl = UI.createAssistantMessage("Building your profile now...");
           chatContainer.appendChild(bridgeEl);
@@ -292,16 +289,14 @@ const App = {
     }
   },
 
-  // ─── Go Deeper — threshold CTA ──────────────────────────────────────────────
+  // ─── Go Deeper ──────────────────────────────────────────────────────────────
   goDeeper() {
-    // Store the completed session so deep.html can pick it up
     try {
       sessionStorage.setItem('pp_first_look', JSON.stringify(this.session));
     } catch(e) {
       console.warn('sessionStorage unavailable:', e);
     }
 
-    // Gate check — set pp_deep_unlocked to 'true' to bypass
     const unlocked = localStorage.getItem('pp_deep_unlocked') === 'true';
     if (!unlocked) {
       this.showDeepGate();
@@ -312,7 +307,6 @@ const App = {
   },
 
   showDeepGate() {
-    // Remove any existing gate
     const existing = document.getElementById('deep-gate-overlay');
     if (existing) existing.remove();
 
@@ -331,7 +325,6 @@ const App = {
     document.body.appendChild(overlay);
   },
 
-  // Temporary unlock for development — replace with Stripe webhook in production
   unlockDeep() {
     localStorage.setItem('pp_deep_unlocked', 'true');
     document.getElementById('deep-gate-overlay')?.remove();
@@ -348,11 +341,9 @@ const App = {
   }
 };
 
-// Boot
 document.addEventListener("DOMContentLoaded", () => App.init());
 window.App = App;
 
-// Legacy global for inline onclick (start button)
 function startConversation() {
   App.startConversation();
 }
