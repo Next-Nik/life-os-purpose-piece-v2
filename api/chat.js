@@ -21,11 +21,11 @@ function createSession() {
 const QUESTIONS = [
   {
     label: "The Moment",
-    text: "Think of a recent moment where something around you was off — at work, in a community, at home, anywhere. Maybe you stepped in. Maybe you didn't. Maybe you're still not sure you did the right thing either way.\n\nWhat happened, and what did you do — or not do?"
+    text: "Something around you was off — and you either stepped in or you didn't. A situation at work, at home, in a group, anywhere. It doesn't have to be dramatic.\n\nPick one. What happened, and what did you do?"
   },
   {
     label: "The Frustration",
-    text: "What's something you keep noticing in the world around you — in organisations, communities, systems, relationships — that frustrates you not because it affects you personally, but because it simply shouldn't be that way?\n\nBe specific. What is it exactly?"
+    text: "What's something you keep seeing go wrong — in organisations, communities, systems, relationships — that bothers you even when it has nothing to do with you personally?\n\nName a specific example. What actually happens that shouldn't?"
   },
   {
     label: "The Pressure",
@@ -291,6 +291,7 @@ Each: title + author/source + one sentence explaining why it is specifically for
 At least one must address the tension or cost from the Initial Reflection.
 At least one must be immediately accessible today.
 Mix formats: books, essays, talks, organisations, communities.
+CRITICAL: Only include resources you are certain exist. Verify title and author are real before including. If uncertain, omit entirely. Three accurate items are better than five where one is invented or misattributed.
 
 THE RULES:
 - Speak directly throughout. "You" not "this pattern" or "this type."
@@ -467,14 +468,16 @@ module.exports = async (req, res) => {
 
     if (!session || session.status === undefined) {
       session = createSession();
-      session.phase = "questions";
+      // Send welcome first — client auto-advances into Q1
+      // Previously jumped straight to questions, leaving WELCOME as dead code
       return res.status(200).json({
-        message:       `Question 1 of 5\n\n${QUESTIONS[0].text}`,
+        message:      WELCOME,
         session,
-        phase:         "questions",
-        phaseLabel:    "Behavioural Evidence",
-        questionIndex: 0,
-        inputMode:     "text"
+        phase:        "welcome",
+        phaseLabel:   "Signal Reading",
+        inputMode:    "none",
+        autoAdvance:  true,
+        advanceDelay: 2200
       });
     }
 
@@ -496,7 +499,8 @@ module.exports = async (req, res) => {
     if (session.phase === "welcome") {
       session.phase = "questions";
       return res.status(200).json({
-        message:       `Question 1 of 5\n\n${QUESTIONS[0].text}`,
+        message:       QUESTIONS[0].text,
+        questionLabel: `Question 1 of 5 — ${QUESTIONS[0].label}`,
         session,
         phase:         "questions",
         phaseLabel:    "Behavioural Evidence",
@@ -533,7 +537,8 @@ module.exports = async (req, res) => {
         }
 
           return res.status(200).json({
-            message:       `Question ${session.questionIndex + 1} of 5\n\n${QUESTIONS[session.questionIndex].text}`,
+            message:       QUESTIONS[session.questionIndex].text,
+            questionLabel: `Question ${session.questionIndex + 1} of 5 — ${QUESTIONS[session.questionIndex].label}`,
             session,
             phase:         "questions",
             phaseLabel:    "Behavioural Evidence",
@@ -597,7 +602,9 @@ module.exports = async (req, res) => {
             }
 
             return res.status(200).json({
-              message:       acknowledgment + `\n\nQuestion ${session.questionIndex + 1} of 5\n\n${QUESTIONS[session.questionIndex].text}`,
+              message:       acknowledgment,
+              questionLabel: `Question ${session.questionIndex + 1} of 5 — ${QUESTIONS[session.questionIndex].label}`,
+              nextMessage:   QUESTIONS[session.questionIndex].text,
               session,
               phase:         "questions",
               phaseLabel:    "Behavioural Evidence",
@@ -624,7 +631,8 @@ module.exports = async (req, res) => {
         }
 
         return res.status(200).json({
-          message:       `Question ${session.questionIndex + 1} of 5\n\n${QUESTIONS[session.questionIndex].text}`,
+          message:       QUESTIONS[session.questionIndex].text,
+          questionLabel: `Question ${session.questionIndex + 1} of 5 — ${QUESTIONS[session.questionIndex].label}`,
           session,
           phase:         "questions",
           phaseLabel:    "Behavioural Evidence",
