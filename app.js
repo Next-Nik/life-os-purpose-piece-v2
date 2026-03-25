@@ -15,29 +15,45 @@ function initSupabase() {
   } catch { return null; }
 }
 
-async function supabaseSavePurposePiece(session, userId) {
+// Tracks the current session's DB row — insert once, update after
+let _ppSessionRowId = null;
+
+async function supabaseSavePurposePiece(session, userId, isComplete = false) {
   const sb = initSupabase();
   if (!sb || !userId || !session) return;
   try {
-    await sb.from("purpose_piece_sessions").insert({
-      user_id:            userId,
-      archetype:          session.archetype           || null,
-      domain:             session.domain              || null,
-      scale:              session.scale               || null,
-      pattern_restatement:session.pattern_restatement || null,
-      archetype_frame:    session.synthesis?.archetype_frame    || null,
-      domain_frame:       session.synthesis?.domain_frame       || null,
-      scale_frame:        session.synthesis?.scale_frame        || null,
-      responsibility:     session.synthesis?.responsibility     || null,
-      actions:            session.synthesis?.actions            || null,
-      resources:          session.synthesis?.resources          || null,
-      synthesis:          session.synthesis            || null,
-      transcript:         session.transcript           || null,
-      completed_at:       new Date().toISOString()
-    });
-    console.log('[PurposePiece] Session saved to Supabase');
+    if (_ppSessionRowId) {
+      // Update existing row
+      await sb.from("purpose_piece_sessions").update({
+        archetype:          session.archetype           || null,
+        domain:             session.domain              || null,
+        scale:              session.scale               || null,
+        pattern_restatement:session.pattern_restatement || null,
+        archetype_frame:    session.synthesis?.archetype_frame    || null,
+        domain_frame:       session.synthesis?.domain_frame       || null,
+        scale_frame:        session.synthesis?.scale_frame        || null,
+        responsibility:     session.synthesis?.responsibility     || null,
+        actions:            session.synthesis?.actions            || null,
+        resources:          session.synthesis?.resources          || null,
+        synthesis:          session.synthesis            || null,
+        transcript:         session.transcript           || null,
+        completed_at:       isComplete ? new Date().toISOString() : null
+      }).eq("id", _ppSessionRowId);
+    } else {
+      // Insert new row and store id
+      const { data, error } = await sb.from("purpose_piece_sessions").insert({
+        user_id:     userId,
+        transcript:  session.transcript || null,
+        completed_at: null
+      }).select("id").single();
+      if (!error && data?.id) {
+        _ppSessionRowId = data.id;
+        console.log("[PurposePiece] Session row created:", data.id);
+      }
+      if (error) console.warn("[PurposePiece] Insert failed:", error.message);
+    }
   } catch (err) {
-    console.warn('[PurposePiece] Save failed:', err);
+    console.warn("[PurposePiece] Save failed:", err);
   }
 }
 
@@ -290,9 +306,9 @@ const App = {
       UI.scrollToMessage(buttonsEl);
     }
 
-    // Save to Supabase on completion
-    if (data.complete && this.userId && this.session) {
-      supabaseSavePurposePiece(this.session, this.userId);
+    // Save to Supabase on every response — creates row on first call, updates after
+    if (this.userId && this.session) {
+      supabaseSavePurposePiece(this.session, this.userId, !!data.complete);
     }
 
     // Set input mode
