@@ -2,15 +2,65 @@
 // Session management, API communication, event handling.
 // Depends on ui.js (loaded first via index.html).
 
+// ─── Supabase init ────────────────────────────────────────────────────────────
+let _supabase = null;
+function initSupabase() {
+  if (_supabase) return _supabase;
+  const url = window.SUPABASE_URL;
+  const key = window.SUPABASE_ANON_KEY;
+  if (!url || !key || url.includes("YOUR_")) return null;
+  try {
+    _supabase = window.supabase.createClient(url, key);
+    return _supabase;
+  } catch { return null; }
+}
+
+async function supabaseSavePurposePiece(session, userId) {
+  const sb = initSupabase();
+  if (!sb || !userId || !session) return;
+  try {
+    await sb.from("purpose_piece_sessions").insert({
+      user_id:            userId,
+      archetype:          session.archetype           || null,
+      domain:             session.domain              || null,
+      scale:              session.scale               || null,
+      pattern_restatement:session.pattern_restatement || null,
+      archetype_frame:    session.synthesis?.archetype_frame    || null,
+      domain_frame:       session.synthesis?.domain_frame       || null,
+      scale_frame:        session.synthesis?.scale_frame        || null,
+      responsibility:     session.synthesis?.responsibility     || null,
+      actions:            session.synthesis?.actions            || null,
+      resources:          session.synthesis?.resources          || null,
+      synthesis:          session.synthesis            || null,
+      transcript:         session.transcript           || null,
+      completed_at:       new Date().toISOString()
+    });
+    console.log('[PurposePiece] Session saved to Supabase');
+  } catch (err) {
+    console.warn('[PurposePiece] Save failed:', err);
+  }
+}
+
 const App = {
   session: null,
   currentPhase: null,
   currentOptions: null,
   isWaiting: false,
+  userId: null,
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   init() {
     this.bindEvents();
+    this.checkExistingAuth();
+  },
+
+  async checkExistingAuth() {
+    const sb = initSupabase();
+    if (!sb) return;
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      if (session?.user) this.userId = session.user.id;
+    } catch {}
   },
 
   bindEvents() {
@@ -50,10 +100,28 @@ const App = {
     }
   },
 
+  // ─── Ensure anonymous session ─────────────────────────────────────────────
+  async ensureSession() {
+    if (this.userId) return;
+    const sb = initSupabase();
+    if (!sb) return;
+    try {
+      const { data, error } = await sb.auth.signInAnonymously();
+      if (error) { console.warn('[PurposePiece] Anonymous sign-in failed:', error.message); return; }
+      if (data?.user) {
+        this.userId = data.user.id;
+        console.log('[PurposePiece] Anonymous session created:', data.user.id);
+      }
+    } catch (err) {
+      console.warn('[PurposePiece] ensureSession error:', err);
+    }
+  },
+
   // ─── Start ─────────────────────────────────────────────────────────────────
   async startConversation() {
     UI.hideWelcome();
     UI.showChat();
+    await this.ensureSession();
 
     const chatContainer = document.getElementById("chat-container");
     const typingEl = UI.createTypingIndicator();
@@ -220,6 +288,11 @@ const App = {
       });
       chatContainer.appendChild(buttonsEl);
       UI.scrollToMessage(buttonsEl);
+    }
+
+    // Save to Supabase on completion
+    if (data.complete && this.userId && this.session) {
+      supabaseSavePurposePiece(this.session, this.userId);
     }
 
     // Set input mode
