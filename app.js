@@ -2,67 +2,12 @@
 // Session management, API communication, event handling.
 // Depends on ui.js (loaded first via index.html).
 
-// ─── Supabase init ────────────────────────────────────────────────────────────
-let _supabase = null;
-function initSupabase() {
-  if (_supabase) return _supabase;
-  const url = window.SUPABASE_URL;
-  const key = window.SUPABASE_ANON_KEY;
-  if (!url || !key || url.includes("YOUR_")) return null;
-  try {
-    _supabase = window.supabase.createClient(url, key);
-    return _supabase;
-  } catch { return null; }
-}
-
-// Tracks the current session's DB row — insert once, update after
-let _ppSessionRowId = null;
-
-async function supabaseSavePurposePiece(session, userId, isComplete = false) {
-  const sb = initSupabase();
-  if (!sb || !userId || !session) return;
-  try {
-    if (_ppSessionRowId) {
-      // Update existing row
-      await sb.from("purpose_piece_sessions").update({
-        archetype:          session.archetype           || null,
-        domain:             session.domain              || null,
-        scale:              session.scale               || null,
-        pattern_restatement:session.pattern_restatement || null,
-        archetype_frame:    session.synthesis?.archetype_frame    || null,
-        domain_frame:       session.synthesis?.domain_frame       || null,
-        scale_frame:        session.synthesis?.scale_frame        || null,
-        responsibility:     session.synthesis?.responsibility     || null,
-        actions:            session.synthesis?.actions            || null,
-        resources:          session.synthesis?.resources          || null,
-        synthesis:          session.synthesis            || null,
-        transcript:         session.transcript           || null,
-        completed_at:       isComplete ? new Date().toISOString() : null
-      }).eq("id", _ppSessionRowId);
-    } else {
-      // Insert new row and store id
-      const { data, error } = await sb.from("purpose_piece_sessions").insert({
-        user_id:     userId,
-        transcript:  session.transcript || null,
-        completed_at: null
-      }).select("id").single();
-      if (!error && data?.id) {
-        _ppSessionRowId = data.id;
-        console.log("[PurposePiece] Session row created:", data.id);
-      }
-      if (error) console.warn("[PurposePiece] Insert failed:", error.message);
-    }
-  } catch (err) {
-    console.warn("[PurposePiece] Save failed:", err);
-  }
-}
-
 const App = {
   session: null,
   currentPhase: null,
   currentOptions: null,
   isWaiting: false,
-  userId: null,
+  messageHistory: [],   // [{role, content, domEl}] for back navigation
 
   // ─── Init ──────────────────────────────────────────────────────────────────
   init() {
@@ -71,35 +16,19 @@ const App = {
   },
 
   async checkExistingAuth() {
-    const sb = initSupabase();
-    if (!sb) return;
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (session?.user) this.userId = session.user.id;
-    } catch {}
+    if (window.LIFEOS_USER_ID) {
+      this.userId = window.LIFEOS_USER_ID;
+    }
   },
 
   bindEvents() {
+    // Single entry screen — direct bind to begin button
+    const beginBtn = document.getElementById("begin-btn");
+    if (beginBtn) beginBtn.addEventListener("click", () => this.startConversation());
+
     const sendBtn = document.getElementById("send-btn");
     const input   = document.getElementById("user-input");
-    let currentSlide = 0;
-    const totalSlides = 3;
-    const track  = document.getElementById("carousel-track");
-    const arrow  = document.getElementById("carousel-arrow");
-    const dots   = document.querySelectorAll(".carousel-dot");
 
-    const advanceCarousel = () => {
-      currentSlide++;
-      track.style.transform = `translateX(-${currentSlide * 33.333}%)`;
-      dots.forEach((d, i) => d.classList.toggle("active", i === currentSlide));
-
-      if (currentSlide === totalSlides - 1) {
-        arrow.outerHTML = `<button class="carousel-begin" id="carousel-arrow">Find where you fit</button>`;
-        document.getElementById("carousel-arrow").addEventListener("click", () => this.startConversation());
-      }
-    };
-
-    if (arrow) arrow.addEventListener("click", advanceCarousel);
     if (sendBtn) sendBtn.addEventListener("click", () => this.sendUserInput());
 
     if (input) {
@@ -116,28 +45,14 @@ const App = {
     }
   },
 
-  // ─── Ensure anonymous session ─────────────────────────────────────────────
-  async ensureSession() {
-    if (this.userId) return;
-    const sb = initSupabase();
-    if (!sb) return;
-    try {
-      const { data, error } = await sb.auth.signInAnonymously();
-      if (error) { console.warn('[PurposePiece] Anonymous sign-in failed:', error.message); return; }
-      if (data?.user) {
-        this.userId = data.user.id;
-        console.log('[PurposePiece] Anonymous session created:', data.user.id);
-      }
-    } catch (err) {
-      console.warn('[PurposePiece] ensureSession error:', err);
-    }
-  },
-
   // ─── Start ─────────────────────────────────────────────────────────────────
   async startConversation() {
     UI.hideWelcome();
     UI.showChat();
-    await this.ensureSession();
+    UI.showNavBar(
+      () => this.goBack(),
+      () => this.restart()
+    );
 
     const chatContainer = document.getElementById("chat-container");
     const typingEl = UI.createTypingIndicator();
@@ -176,6 +91,7 @@ const App = {
     if (!suppressBubble) {
       const userBubble = UI.createUserMessage(text);
       chatContainer.appendChild(userBubble);
+      this.messageHistory.push({ role: "user", content: text, domEl: userBubble });
       UI.scrollToMessage(userBubble);
     }
 
@@ -306,11 +222,6 @@ const App = {
       UI.scrollToMessage(buttonsEl);
     }
 
-    // Save to Supabase on every response — creates row on first call, updates after
-    if (this.userId && this.session) {
-      supabaseSavePurposePiece(this.session, this.userId, !!data.complete);
-    }
-
     // Set input mode
     if (data.complete) {
       UI.setInputMode("none");
@@ -421,10 +332,45 @@ const App = {
   },
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
+  // ─── Navigation ────────────────────────────────────────────────────────────
+  goBack() {
+    if (this.messageHistory.length < 2) return;
+    // Remove last assistant + last user exchange from DOM and history
+    const lastAssistant = this.messageHistory.pop();
+    const lastUser      = this.messageHistory.pop();
+    if (lastAssistant?.domEl) lastAssistant.domEl.remove();
+    if (lastUser?.domEl)      lastUser.domEl.remove();
+    // Also pop from conversation array (used for API calls)
+    if (this.session?.transcript?.length >= 2) {
+      this.session.transcript = this.session.transcript.slice(0, -2);
+    }
+    UI.enableInput();
+    UI.setInputMode("text");
+    UI.setBackEnabled(this.messageHistory.length >= 2);
+  },
+
+  restart() {
+    // Clear everything and return to entry card
+    this.session         = null;
+    this.currentPhase    = null;
+    this.currentOptions  = null;
+    this.isWaiting       = false;
+    this.messageHistory  = [];
+    document.getElementById("chat-container").innerHTML = "";
+    document.getElementById("chat-area").style.display = "none";
+    document.getElementById("progress-container").style.display = "none";
+    document.getElementById("progress-fill").style.width = "0%";
+    document.getElementById("input-area").style.display = "none";
+    document.getElementById("welcome-screen").style.display = "";
+    UI.hideNavBar();
+  },
+
   addAssistantMessage(text) {
     const chatContainer = document.getElementById("chat-container");
     const el = UI.createAssistantMessage(text);
     chatContainer.appendChild(el);
+    this.messageHistory.push({ role: "assistant", content: text, domEl: el });
+    UI.setBackEnabled(this.messageHistory.length >= 2);
     UI.scrollToMessage(el);
     UI.enableInput();
   }

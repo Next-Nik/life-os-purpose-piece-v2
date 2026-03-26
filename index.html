@@ -6,21 +6,19 @@
   <title>Life OS: Purpose Piece</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Cormorant+SC:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
 
   <div class="container">
 
-    <!-- Header -->
     <header class="header">
       <img src="/logo.png" alt="Life OS: Purpose Piece" class="logo" />
       <h1><span class="header-prefix">Life OS: </span>Purpose Piece</h1>
-      <p>Where you fit</p>
+      <p class="header-sub">What's your Piece of Purpose?</p>
     </header>
 
-    <!-- Progress bar -->
     <div class="progress-container" id="progress-container" style="display:none;">
       <div class="progress-bar">
         <div class="progress-fill" id="progress-fill"></div>
@@ -28,58 +26,21 @@
       <div class="progress-label" id="progress-label">Signal Reading</div>
     </div>
 
-    <!-- Welcome carousel -->
+    <!-- Welcome screen — single entry, no carousel -->
     <div id="welcome-screen">
-      <div class="carousel-track" id="carousel-track">
-
-        <!-- Slide 1 -->
-        <div class="carousel-slide" data-slide="0">
-          <h2 class="carousel-heading">Do you know your Purpose Piece?</h2>
-          <p>We all have a specific way of showing up when things need to get done — a natural role we slip into that makes a project, a team, or a community click into place.</p>
-          <p>Most of us do it instinctively. We rarely have a name for it.</p>
-        </div>
-
-        <!-- Slide 2 -->
-        <div class="carousel-slide" data-slide="1">
-          <h2 class="carousel-heading">This isn&#x2019;t a personality test. This is pattern recognition.</h2>
-          <p>Five questions. Each one asks for a specific moment — something that actually happened. No traits, no preferences, no abstract answers.</p>
-          <p>The pattern speaks through what you actually do.</p>
-        </div>
-
-        <!-- Slide 3 -->
-        <div class="carousel-slide" data-slide="2">
-          <h2 class="carousel-heading">About 10 minutes. Answer as yourself.</h2>
-          <p>At the end you&#x2019;ll receive a profile: your archetype, the domain where it belongs, the scale where it&#x2019;s most coherent right now, and what it asks of you.</p>
-          <p>No right answers. Only honest ones.</p>
-        </div>
-
+      <div class="entry-card">
+        <p class="entry-body">Five questions. Each one asks for a real moment. Your pattern emerges.</p>
+        <button class="carousel-begin" id="begin-btn">Find your Purpose Piece</button>
       </div>
-
-      <!-- Carousel nav -->
-      <div class="carousel-nav">
-        <div class="carousel-dots">
-          <span class="carousel-dot active" data-dot="0"></span>
-          <span class="carousel-dot" data-dot="1"></span>
-          <span class="carousel-dot" data-dot="2"></span>
-        </div>
-        <button class="carousel-arrow" id="carousel-arrow" aria-label="Next">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="11" cy="11" r="10.5" stroke="#E89842"/>
-            <path d="M9 7l4 4-4 4" stroke="#E89842" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
-      </div>
-
     </div>
 
-    <!-- Chat area (hidden until assessment starts) -->
+    <!-- Chat area -->
     <div id="chat-area" style="display:none; flex-direction:column; flex:1;">
       <div id="chat-container"></div>
     </div>
 
   </div>
 
-  <!-- Fixed input area -->
   <div class="input-area" id="input-area" style="display:none;">
     <div class="input-inner">
       <textarea
@@ -93,13 +54,12 @@
     </div>
   </div>
 
-  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     window.SUPABASE_URL      = "https://tphbpwzozkskytoichho.supabase.co";
     window.SUPABASE_ANON_KEY = "sb_publishable_M00GF1FWV5tgKHqmyRCZag_kJjgBJn-";
   </script>
-
+  <script src="/auth-guard.js"></script>
   <script src="/ui.js"></script>
   <script src="/app.js"></script>
 

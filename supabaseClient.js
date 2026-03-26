@@ -1,23 +1,14 @@
 // ============================================================
-// LIFE OS — SHARED SUPABASE CLIENT v2
+// LIFE OS — SHARED SUPABASE CLIENT v3
 // supabaseClient.js
 //
-// Fixes from v1:
-// — Safe import.meta.env detection (typeof import !== 'undefined' was invalid)
-// — updateUser() for anonymous upgrade (not signInWithOtp)
-// — Clean export shape for both Vite and vanilla JS tools
-//
-// Usage:
-//   Pulse (Vite):      import { supabase, getAccess, ... } from './supabaseClient'
-//   Orienteering/PP:   <script src="/supabaseClient.js"> then window.LifeOS.supabase
+// Uses new Supabase publishable key format (sb_publishable_...)
+// URL: https://tphbpwzozkskytoichho.supabase.co
 // ============================================================
 
 import { createClient } from '@supabase/supabase-js';
 
 // ─── Safe env detection ───────────────────────────────────────────────────────
-// Vite exposes import.meta.env. Vanilla JS reads from window globals.
-// Never use `typeof import` — that is not a valid runtime check.
-
 const viteEnv = (typeof import.meta !== 'undefined' && import.meta.env)
   ? import.meta.env
   : {};
@@ -48,8 +39,6 @@ export async function getCurrentUser() {
   }
 }
 
-// Start anonymous session — silent, no email required.
-// Call on tool load before the user has provided their email.
 export async function signInAnonymously() {
   if (!supabase) return { user: null, error: 'Supabase not configured' };
   try {
@@ -60,11 +49,9 @@ export async function signInAnonymously() {
   }
 }
 
-// Upgrade anonymous user to identified.
-// IMPORTANT: use updateUser, NOT signInWithOtp.
-// updateUser preserves the anonymous user's existing data.
-// signInWithOtp may create a separate auth flow and lose the anonymous record.
-// Ref: https://supabase.com/docs/guides/auth/auth-anonymous
+// IMPORTANT: use updateUser to upgrade anonymous → identified.
+// This preserves the anonymous user's existing data.
+// Do NOT use signInWithOtp here.
 export async function upgradeToEmail(email) {
   if (!supabase) return { error: 'Supabase not configured' };
   try {
@@ -76,13 +63,6 @@ export async function upgradeToEmail(email) {
 }
 
 // ─── Access check ─────────────────────────────────────────────────────────────
-// Returns: 'full' | 'beta' | 'preview' | 'none'
-// Call on tool load to determine what to show.
-//
-// Example:
-//   const access = await getAccess('pulse')
-//   if (access === 'none') showPaywall()
-
 export async function getAccess(product) {
   if (!supabase) return 'none';
   try {
@@ -97,8 +77,6 @@ export async function getAccess(product) {
       .single();
 
     if (error || !data) return 'none';
-
-    // Check expiry (used for Pulse trial)
     if (data.expires_at && new Date(data.expires_at) < new Date()) return 'none';
 
     return data.tier || 'full';
@@ -108,9 +86,6 @@ export async function getAccess(product) {
 }
 
 // ─── Pulse trial grant ────────────────────────────────────────────────────────
-// Call when a new user signs up for Pulse.
-// Grants 7 days of full access automatically — no card required.
-
 export async function grantPulseTrial(userId) {
   if (!supabase || !userId) return { error: 'Missing supabase or userId' };
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -131,9 +106,6 @@ export async function grantPulseTrial(userId) {
 }
 
 // ─── Foundation signed URL ────────────────────────────────────────────────────
-// Returns a time-limited URL for a Foundation audio file.
-// Only works if user has 'foundation' access.
-
 export async function getFoundationAudioUrl(storagePath, expiresInSeconds = 3600) {
   if (!supabase) return { url: null, error: 'Supabase not configured' };
   try {
