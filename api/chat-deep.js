@@ -179,7 +179,7 @@ const DEEP_OUTPUT_SYSTEM = `You are writing the deep output for Purpose Piece �
 
 This is not a repeat of the First Look profile. It is built from what actually emerged in the deep conversation. Every section must be anchored in something specific from that conversation.
 
-THE SEVEN ARCHETYPES (for reference):
+THE NINE ARCHETYPES (for reference):
 - STEWARD: Tends systems, ensures they remain whole. Maintains, repairs, sustains.
 - MAKER: Builds what doesn't exist. Concept to creation. Values function over perfection.
 - ARCHITECT: Designs structural conditions. Not the instance — the container. Makes systems sound.
@@ -187,6 +187,8 @@ THE SEVEN ARCHETYPES (for reference):
 - GUARDIAN: Protects what matters. Recognises threats early. Holds standards.
 - EXPLORER: Ventures into unknown territory. Comfortable with uncertainty. Brings back what's needed.
 - SAGE: Sees patterns. Holds complexity. Clarifies meaning.
+- MIRROR: Reflects what is true — about human experience, the interior life, the living world. Expression felt before it is understood. Makes the invisible visible and the unbearable bearable.
+- EXEMPLAR: Contributes by being the example. Embodies the standard fully — in public, under pressure, at the edge of human capacity. Demonstration, not instruction.
 
 STRUCTURE — seven sections:
 

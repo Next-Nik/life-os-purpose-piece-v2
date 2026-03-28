@@ -230,12 +230,24 @@ async function runPhase3(transcript) {
   return extractJSON(response.content[0].text);
 }
 
+
+// ─── NextUs Horizon Goals by domain ─────────────────────────────────────────
+const DOMAIN_HORIZON_GOALS = {
+  "HUMAN BEING":      "Every person has access to the conditions that allow them to know themselves, develop fully, and contribute meaningfully.",
+  "SOCIETY":          "Human communities are organised in ways that generate trust, belonging, and genuine collective agency.",
+  "NATURE":           "The living systems of the planet are regenerating, and humanity is a net contributor to that regeneration.",
+  "TECHNOLOGY":       "Our tools extend human wisdom and deepen connection, developing in relationship with our capacity to use them well.",
+  "FINANCE & ECONOMY":"Resources flow toward what sustains and generates life — rewarding care, contribution, and long-term thinking.",
+  "LEGACY":           "Each generation leaves the conditions for the next generation to flourish more fully than they did.",
+  "VISION":           "Humanity has a shared and evolving picture of where it is going — and the coordination infrastructure to move toward it together."
+};
+
 // ─── Phase 4 system prompt ────────────────────────────────────────────────────
 const PHASE4_SYSTEM = `You are the Your Purpose Piece layer. The Initial Reflection showed the person their pattern. Now name it — and make clear what that naming asks of them.
 
 Speak directly to the person throughout. "You" not "this pattern" or "this person." Every section should be anchored in something specific they said or did. If a sentence could appear in any profile for this archetype, rewrite it.
 
-THE SEVEN ARCHETYPES:
+THE NINE ARCHETYPES:
 - STEWARD: Tends systems, ensures they remain whole. Maintains, repairs, sustains. Patient with operational work.
 - MAKER: Builds what doesn't exist. Concept to creation. Comfortable with iteration. Values function over perfection.
 - ARCHITECT: Designs the structural conditions that determine what can be built at all. Doesn't build the thing — designs the container the thing lives inside. When something keeps breaking, redesigns the conditions producing the break. Energised by making the system sound, not shipping the output.
@@ -243,6 +255,8 @@ THE SEVEN ARCHETYPES:
 - GUARDIAN: Protects what matters, holds boundaries. Recognises threats early. Fierce protecting, gentle tending.
 - EXPLORER: Ventures into unknown territory, brings back what's needed. Comfortable with uncertainty.
 - SAGE: Holds wisdom, offers perspective that clarifies. Sees patterns across time. Values understanding over action.
+- MIRROR: Contributes by reflecting what's true — about human experience, the interior life, the living world — in ways others can finally see and receive. Doesn't argue or build or protect. Shows. Artists, writers, musicians, filmmakers — anyone whose contribution is making the invisible visible or the unbearable bearable. The work is expression so complete that others recognise themselves in it. Distinct from Sage: Sage operates through accumulated understanding, offered conceptually. Mirror operates through expression — felt before it's understood.
+- EXEMPLAR: Contributes by being the example. Raises the standard of what's possible by embodying it fully — in public, under pressure, at the edge of human capacity. Athletes, master craftspeople, performers, anyone whose contribution is demonstration rather than instruction. The work is full expression of human potential, offered so completely that others believe it's possible for them too. Distinct from Mirror: Mirror reflects human experience back to people so they feel recognised. Exemplar expands what people believe humans can do or be.
 
 THE SEVEN DOMAINS:
 - HUMAN BEING: Personal development, consciousness, inner work, transformation.
@@ -279,6 +293,10 @@ Scale is coherence bandwidth, not ambition. Do not assume larger is better. Refe
 Section 5 — Responsibility (2-4 sentences):
 Name what this pattern asks of them in plain language. Not a warning — a weight. Include one line grounding this in capacity: this exists in them because something in them is built for it. That is not praise. That is why the responsibility is real.
 
+Section 5b — The Civilisational Statement (1 sentence, exact format):
+State: "I am a [Archetype] in [Domain] at the [Scale] scale, working toward [Horizon Goal for their domain]."
+This is the locked NextUs identity statement. Use the exact Horizon Goal text provided. This is not aspirational — it is a statement of orientation.
+
 Section 6 — Actions:
 Three tiers — each specific to this person's actual context, not generic archetype actions:
 Light (this week): 30-60 minutes. No special resources. Something they could start today.
@@ -312,6 +330,7 @@ OUTPUT — return JSON only, no other text:
   "domain_frame": "1 paragraph",
   "scale_frame": "1 paragraph",
   "responsibility": "2-4 sentences",
+  "civilisational_statement": "I am a [Archetype] in [Domain] at the [Scale] scale, working toward [Horizon Goal].",
   "actions": {
     "light": "specific action with brief context",
     "medium": "specific action with brief context",
@@ -327,7 +346,12 @@ async function runPhase4(transcript, synthesis) {
     `Q${i+1} — ${QUESTIONS[i].label}\nAnswer: ${entry.answer}${entry.thin ? " [thin/evasive]" : ""}`
   ).join("\n\n");
 
-  const payload = `PHASE 3 SYNTHESIS:\n${synthesis.synthesis_text}\n\nINTERNAL SIGNALS:\n${JSON.stringify(synthesis.internal_signals, null, 2)}\n\nORIGINAL ANSWERS:\n${transcriptText}`;
+  // Determine domain from synthesis to pass Horizon Goal
+  const domainHint = synthesis.internal_signals?.domain_pull || "";
+  const domainKey  = Object.keys(DOMAIN_HORIZON_GOALS).find(k => domainHint.toUpperCase().includes(k)) || "VISION";
+  const horizonGoal = DOMAIN_HORIZON_GOALS[domainKey];
+
+  const payload = `PHASE 3 SYNTHESIS:\n${synthesis.synthesis_text}\n\nINTERNAL SIGNALS:\n${JSON.stringify(synthesis.internal_signals, null, 2)}\n\nORIGINAL ANSWERS:\n${transcriptText}\n\nHORIZON GOAL FOR THEIR DOMAIN:\n"${horizonGoal}"\n\nUse this exact text in the civilisational_statement field.`;
 
   const response = await anthropic.messages.create({
     model:      "claude-sonnet-4-20250514",
@@ -390,7 +414,7 @@ function renderPhase4(p4) {
 
     <div class="profile-section">
       <div class="profile-section-label">Domain</div>
-      <p class="profile-domain-context">There are 7 domains of collective work. Yours is <strong>${esc(domainName)}</strong>.</p>
+      <p class="profile-domain-context">There are seven domains of collective work. Yours is <strong>${esc(domainName)}</strong>.</p>
       <p>${esc(p4.domain_frame)}</p>
     </div>
 
@@ -427,7 +451,43 @@ function renderPhase4(p4) {
       <div class="profile-resources">${resourcesHtml}</div>
     </div>
 
-    <div class="profile-closing">Your Purpose Piece. This is where you fit.</div>
+    <div class="profile-closing">This is what you carry. The question now is what you do with it.</div>
+
+    <div class="profile-nexus">
+      <div class="profile-nexus-eyebrow">Your Place in the Larger Map</div>
+      <p class="profile-nexus-statement">${esc(p4.civilisational_statement || "")}</p>
+      <p class="profile-nexus-body">NextUs is a living map of where humanity actually is across seven domains — and where the people showing up for the gap between where we are and where we could be are working. Your Purpose Piece is your entry point.</p>
+      <a href="https://nextus.world" class="profile-nexus-link">Explore the civilisational map &rarr;</a>
+    </div>
+
+    <div class="profile-personal-note-section">
+      <div class="profile-section-label">In Your Own Words</div>
+
+      <textarea
+        id="ppPersonalNote"
+        class="pp-note-textarea"
+        placeholder="What does this actually mean to you? Write it in your own voice — the version that sounds like you."
+        oninput="App.onPpNoteInput(this.value)"
+      ></textarea>
+      <p class="pp-note-hint">When you've written your own version, it leads. The profile sits behind it.</p>
+
+      <div id="ppToolOutputToggle" style="margin-top:14px;">
+        <button class="pp-expand-btn" onclick="App.togglePpProfile()" id="ppExpandBtn">
+          See your Purpose Piece profile →
+        </button>
+        <div id="ppProfileSummary" style="display:none;" class="pp-profile-summary">
+          <p><strong>${esc(archetypeName)}</strong> · ${esc(domainName)} · ${esc(scaleName)}</p>
+          <p style="margin-top:8px;font-style:italic;color:rgba(15,21,35,0.55);">${esc(p4.pattern_restatement || "")}</p>
+        </div>
+      </div>
+
+      <button class="pp-lock-btn" id="ppLockBtn" onclick="App.lockPpNote()" style="display:none;">
+        Lock this as my statement ✓
+      </button>
+      <div class="pp-locked-msg" id="ppLockedMsg" style="display:none;">
+        <span>✓ Locked.</span> Your words lead now.
+      </div>
+    </div>
 
     <div class="profile-threshold">
       <div class="profile-threshold-eyebrow">First Look</div>
@@ -441,11 +501,11 @@ function renderPhase4(p4) {
 // ─── Welcome message ──────────────────────────────────────────────────────────
 const WELCOME = `Five questions. Each one asks for a specific moment, a real decision, an honest cost.
 
-Answer as yourself — not who you're working toward.
+Answer as yourself — not who you're working toward, not who you think you should be.
 
-At the end, you'll receive a profile: your Purpose Piece, the domain where it belongs, the scale where it's most coherent right now, and what it asks of you.
+At the end you'll receive a profile: your pattern, named. The archetype. The domain where it most wants to operate. The scale where it's most coherent right now. What it asks of you. And your place in the larger work.
 
-The pattern speaks through what you actually do.`;
+The pattern speaks through what you actually do — not through what you intend or aspire to.`;
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 module.exports = async (req, res) => {
@@ -705,13 +765,17 @@ async function frameAndDeliver(session, res) {
 
   session.status = "complete";
 
+  // Extract the civilisational identity statement for DB storage
+  const identityStatementSystem = p4.civilisational_statement || null;
+
   return res.status(200).json({
-    message:    renderPhase4(p4),
+    message:                  renderPhase4(p4),
     session,
-    phase:      "complete",
-    phaseLabel: "Your Purpose Piece",
-    inputMode:  "none",
-    complete:   true,
-    profile:    p4
+    phase:                    "complete",
+    phaseLabel:               "Your Purpose Piece",
+    inputMode:                "none",
+    complete:                 true,
+    profile:                  p4,
+    identity_statement_system: identityStatementSystem
   });
 }

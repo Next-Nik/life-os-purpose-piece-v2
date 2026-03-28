@@ -1,9 +1,11 @@
 {
-  "name": "purpose-piece",
+  "name": "life-os-purpose-piece",
   "version": "1.0.0",
-  "description": "Purpose Piece experience",
   "private": true,
+  "engines": {
+    "node": "18.x"
+  },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.25.0"
+    "@anthropic-ai/sdk": "^0.20.0"
   }
 }

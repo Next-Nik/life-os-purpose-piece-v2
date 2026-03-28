@@ -21,6 +21,133 @@ const App = {
     }
   },
 
+
+// ─── NextUs vocabulary normalisation ─────────────────────────────────────────
+// Maps raw archetype/domain/scale strings from Phase 4 to locked NextUs values
+
+const DOMAIN_MAP = {
+  "human being":    "human-being",
+  "humanbeing":     "human-being",
+  "human-being":    "human-being",
+  "society":        "society",
+  "nature":         "nature",
+  "technology":     "technology",
+  "finance":        "finance-economy",
+  "finance & economy": "finance-economy",
+  "finance and economy": "finance-economy",
+  "finance-economy":"finance-economy",
+  "economy":        "finance-economy",
+  "legacy":         "legacy",
+  "vision":         "vision"
+};
+
+const SCALE_MAP = {
+  "local":          "local",
+  "municipal":      "municipal",
+  "regional":       "regional",
+  "national":       "national",
+  "international":  "international",
+  "global":         "global",
+  "civilisational": "global",
+  "civilizational": "global",
+  "bioregional":    "regional"
+};
+
+function normaliseDomain(raw) {
+  if (!raw) return null;
+  const key = raw.toLowerCase().trim().replace(/[^a-z& ]/g, "");
+  return DOMAIN_MAP[key] || null;
+}
+
+function normaliseScale(raw) {
+  if (!raw) return null;
+  const key = raw.toLowerCase().trim();
+  return SCALE_MAP[key] || null;
+}
+
+function normaliseArchetype(raw) {
+  if (!raw) return null;
+  // Capitalise first letter, lowercase rest
+  return raw.trim().charAt(0).toUpperCase() + raw.trim().slice(1).toLowerCase();
+}
+
+// ─── Supabase save on completion ──────────────────────────────────────────────
+let _ppSessionRowId = null;
+
+async function supabaseSavePurposePiece(session, userId, profile, isComplete, identitySystem) {
+  const sb = window.supabase?.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+  );
+  if (!sb || !userId) return null;
+
+  // Extract and normalise coordinates from profile
+  const archetypeRaw = profile ? extractArchetypeName(profile.archetype_frame) : null;
+  const domainRaw    = profile ? extractDomainName(profile.domain_frame)       : null;
+  const scaleRaw     = profile ? extractScaleName(profile.scale_frame)         : null;
+
+  const archetype = normaliseArchetype(archetypeRaw);
+  const domain    = normaliseDomain(domainRaw);
+  const scale     = normaliseScale(scaleRaw);
+
+  try {
+    if (_ppSessionRowId) {
+      await sb.from("purpose_piece_sessions").update({
+        archetype,
+        domain,
+        scale,
+        pattern_restatement: profile?.pattern_restatement || null,
+        archetype_frame:     profile?.archetype_frame     || null,
+        domain_frame:        profile?.domain_frame        || null,
+        scale_frame:         profile?.scale_frame         || null,
+        responsibility:      profile?.responsibility      || null,
+        actions:             profile?.actions             || null,
+        resources:           profile?.resources           || null,
+        synthesis:           session?.synthesis           || null,
+        transcript:          session?.transcript          || null,
+        completed_at:        isComplete ? new Date().toISOString() : null
+      }).eq("id", _ppSessionRowId);
+    } else {
+      const { data, error } = await sb.from("purpose_piece_sessions").insert({
+        user_id:                   userId,
+        archetype,
+        domain,
+        scale,
+        transcript:                session?.transcript || null,
+        identity_statement_system: identitySystem || null,
+        completed_at:              isComplete ? new Date().toISOString() : null
+      }).select("id").single();
+      if (!error && data?.id) {
+        _ppSessionRowId = data.id;
+        console.log("[PurposePiece] Session row created:", data.id);
+      }
+    }
+    return _ppSessionRowId;
+  } catch (err) {
+    console.warn("[PurposePiece] Save failed:", err);
+    return null;
+  }
+}
+
+// Extract archetype/domain/scale from Phase 4 frame text
+function extractArchetypeName(frame) {
+  if (!frame) return null;
+  const m = frame.match(/pattern most aligned with this (?:movement )?is ([\w]+)/i);
+  return m ? m[1] : null;
+}
+
+function extractDomainName(frame) {
+  if (!frame) return null;
+  const m = frame.match(/territory.*?is ([A-Z][a-z]+(?: ?[&A-Z][a-z]+)*)/);
+  return m ? m[1].trim() : null;
+}
+
+function extractScaleName(frame) {
+  if (!frame) return null;
+  const m = frame.match(/scale.*?is ([A-Z][a-z]+)/);
+  return m ? m[1].trim() : null;
+}
+
   bindEvents() {
     // Single entry screen — direct bind to begin button
     const beginBtn = document.getElementById("begin-btn");
@@ -332,6 +459,52 @@ const App = {
   },
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
+
+  // ─── Purpose Piece personal note mechanic ─────────────────────────────────
+  onPpNoteInput(value) {
+    const lockBtn   = document.getElementById("ppLockBtn");
+    const expandBtn = document.getElementById("ppExpandBtn");
+    if (lockBtn) lockBtn.style.display = value.trim() ? "block" : "none";
+    try { localStorage.setItem("lifeos_pp_personal_note", value); } catch {}
+  },
+
+  togglePpProfile() {
+    const summary   = document.getElementById("ppProfileSummary");
+    const btn       = document.getElementById("ppExpandBtn");
+    if (!summary) return;
+    const isOpen    = summary.style.display !== "none";
+    summary.style.display = isOpen ? "none" : "block";
+    btn.textContent = isOpen ? "See your Purpose Piece profile →" : "Hide profile ↑";
+  },
+
+  async lockPpNote() {
+    const textarea  = document.getElementById("ppPersonalNote");
+    const lockBtn   = document.getElementById("ppLockBtn");
+    const lockedMsg = document.getElementById("ppLockedMsg");
+    const value     = textarea?.value?.trim();
+    if (!value) return;
+
+    if (this.userId && _ppSessionRowId) {
+      try {
+        const sb = window.supabase?.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+        if (sb) {
+          // Write user version to the session row — system version is untouched
+          await sb.from("purpose_piece_sessions").update({
+            identity_statement_user: value
+          }).eq("id", _ppSessionRowId);
+        }
+      } catch (err) {
+        console.warn("[PurposePiece] Note lock save failed:", err);
+      }
+    }
+
+    try { localStorage.setItem("lifeos_pp_personal_locked", value); } catch {}
+
+    if (lockBtn)   lockBtn.style.display   = "none";
+    if (lockedMsg) lockedMsg.style.display = "block";
+    if (textarea)  textarea.style.borderStyle = "solid";
+  },
+
   // ─── Navigation ────────────────────────────────────────────────────────────
   goBack() {
     if (this.messageHistory.length < 2) return;
