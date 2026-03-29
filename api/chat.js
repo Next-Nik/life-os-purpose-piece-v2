@@ -558,8 +558,9 @@ module.exports = async (req, res) => {
     // ── Welcome → Q1 ─────────────────────────────────────────────────────────
     if (session.phase === "welcome") {
       session.phase = "questions";
+      const opening = "Five questions. Each one asks for a real moment, a real decision, an honest cost. Your pattern — the particular way you show up when something needs doing — is already there. These questions surface it.\n\n" + QUESTIONS[0].text;
       return res.status(200).json({
-        message:       QUESTIONS[0].text,
+        message:       opening,
         questionLabel: `Question 1 of 5 — ${QUESTIONS[0].label}`,
         session,
         phase:         "questions",
