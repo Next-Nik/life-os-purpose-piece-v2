@@ -2,26 +2,6 @@
 // Session management, API communication, event handling.
 // Depends on ui.js (loaded first via index.html).
 
-const App = {
-  session: null,
-  currentPhase: null,
-  currentOptions: null,
-  isWaiting: false,
-  messageHistory: [],   // [{role, content, domEl}] for back navigation
-
-  // ─── Init ──────────────────────────────────────────────────────────────────
-  init() {
-    this.bindEvents();
-    this.checkExistingAuth();
-  },
-
-  async checkExistingAuth() {
-    if (window.LIFEOS_USER_ID) {
-      this.userId = window.LIFEOS_USER_ID;
-    }
-  },
-
-
 // ─── NextUs vocabulary normalisation ─────────────────────────────────────────
 // Maps raw archetype/domain/scale strings from Phase 4 to locked NextUs values
 
@@ -148,6 +128,26 @@ function extractScaleName(frame) {
   return m ? m[1].trim() : null;
 }
 
+const App = {
+  session: null,
+  currentPhase: null,
+  currentOptions: null,
+  isWaiting: false,
+  messageHistory: [],   // [{role, content, domEl}] for back navigation
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+  init() {
+    this.bindEvents();
+    this.checkExistingAuth();
+  },
+
+  async checkExistingAuth() {
+    if (window.LIFEOS_USER_ID) {
+      this.userId = window.LIFEOS_USER_ID;
+    }
+  },
+
+  bindEvents() {
   bindEvents() {
     // Single entry screen — direct bind to begin button
     const beginBtn = document.getElementById("begin-btn");
@@ -549,8 +549,7 @@ function extractScaleName(frame) {
   }
 };
 
-// App.init() is called by the lifeos:auth event in index.html
-// This prevents the race condition where init fires before auth resolves
+// App.init() called from lifeos:auth event in index.html
 window.App = App;
 
 function startConversation() {
