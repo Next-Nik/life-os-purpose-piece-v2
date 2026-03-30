@@ -2,26 +2,6 @@
 // Session management, API communication, event handling.
 // Depends on ui.js (loaded first via index.html).
 
-const App = {
-  session: null,
-  currentPhase: null,
-  currentOptions: null,
-  isWaiting: false,
-  messageHistory: [],   // [{role, content, domEl}] for back navigation
-
-  // ─── Init ──────────────────────────────────────────────────────────────────
-  init() {
-    this.bindEvents();
-    this.checkExistingAuth();
-  },
-
-  async checkExistingAuth() {
-    if (window.LIFEOS_USER_ID) {
-      this.userId = window.LIFEOS_USER_ID;
-    }
-  },
-
-
 // ─── NextUs vocabulary normalisation ─────────────────────────────────────────
 // Maps raw archetype/domain/scale strings from Phase 4 to locked NextUs values
 
@@ -52,6 +32,28 @@ const SCALE_MAP = {
   "civilizational": "global",
   "bioregional":    "regional"
 };
+
+const App = {
+  session: null,
+  currentPhase: null,
+  currentOptions: null,
+  isWaiting: false,
+  messageHistory: [],   // [{role, content, domEl}] for back navigation
+
+  // ─── Init ──────────────────────────────────────────────────────────────────
+  init() {
+    this.bindEvents();
+    this.checkExistingAuth();
+  },
+
+  async checkExistingAuth() {
+    if (window.LIFEOS_USER_ID) {
+      this.userId = window.LIFEOS_USER_ID;
+    }
+  },
+
+
+
 
 function normaliseDomain(raw) {
   if (!raw) return null;
