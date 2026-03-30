@@ -148,7 +148,6 @@ const App = {
   },
 
   bindEvents() {
-  bindEvents() {
     // Single entry screen — direct bind to begin button
     const beginBtn = document.getElementById("begin-btn");
     if (beginBtn) beginBtn.addEventListener("click", () => this.startConversation());
