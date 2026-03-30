@@ -1,0 +1,16 @@
+{
+  "functions": {
+    "api/chat.js": {
+      "maxDuration": 60
+    },
+    "api/chat-deep.js": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/deep",
+      "destination": "/deep.html"
+    }
+  ]
+}
