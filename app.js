@@ -549,7 +549,8 @@ function extractScaleName(frame) {
   }
 };
 
-document.addEventListener("DOMContentLoaded", () => App.init());
+// App.init() is called by the lifeos:auth event in index.html
+// This prevents the race condition where init fires before auth resolves
 window.App = App;
 
 function startConversation() {

@@ -92,10 +92,13 @@ window.addEventListener("lifeos:auth",function(e){
     d.textContent=i;d.href="https://nextus.world/profile.html";
     d.title="Your profile";d.style.display="flex";
   }
-  // Auto-start: fire begin-btn click once auth resolves
-  var btn=document.getElementById("begin-btn");
-  if(btn) btn.click();
-});
+  // Auto-start: init App then start conversation directly
+  // Avoids race condition where begin-btn click fires before App.init() binds it
+  if(window.App) {
+    App.init();
+    App.startConversation();
+  }
+}, { once: true });
 </script>
 </body>
 </html>
