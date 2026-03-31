@@ -782,12 +782,12 @@ body {
 
 .question-header {
   font-family: var(--font-sc);
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: #A8721A;
   text-transform: uppercase;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.10em;
 }
 
 .profile-threshold {
