@@ -533,13 +533,15 @@ function renderPhase4(p4) {
 }
 
 // ─── Welcome message ──────────────────────────────────────────────────────────
-const WELCOME = `Five questions. Each one asks for a specific moment, a real decision, an honest cost.
+const WELCOME = `Every group, team, and community needs different people in different roles to function well. These roles map to nine Contribution Archetypes: Steward, Maker, Architect, Connector, Guardian, Explorer, Sage, Mirror, and Exemplar. The same job can — and often should — draw from multiple archetypes.
 
-Answer as yourself — not who you're working toward, not who you think you should be.
+The world can be understood as an interlocking system of seven domains, each with its own subdomains, challenges, and people working inside it. Everyone is suited to some domains more than others.
 
-At the end you'll receive a profile: your pattern, named. The archetype. The domain where it most wants to operate. The scale where it's most coherent right now. What it asks of you. And your place in the larger work.
+The third dimension is scale. Some people operate at the level of a neighbourhood or community — close, immediate, relational. Others are oriented toward the planetary or civilisational. Neither is better. All are needed.
 
-The pattern speaks through what you actually do — not through what you intend or aspire to.`;
+Your Contribution Archetype, your domain, and your scale — together, those three things are your Purpose Piece.
+
+Ready to find where you fit?`;
 
 // ─── Main handler ─────────────────────────────────────────────────────────────
 module.exports = async (req, res) => {
