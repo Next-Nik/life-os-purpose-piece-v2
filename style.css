@@ -781,13 +781,13 @@ body {
 }
 
 .question-header {
-  font-family: var(--font-serif);
-  font-size: 9px;
+  font-family: var(--font-sc);
+  font-size: 11px;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  color: var(--gold);
+  color: #A8721A;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
 }
 
 .profile-threshold {
